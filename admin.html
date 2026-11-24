@@ -214,9 +214,9 @@
     <div class="lock-screen" id="lockScreen">
       <div class="lock-card">
         <h1>GONION VAULT</h1>
-        <p>Private Owner Dashboard. Enter your PIN to view collected user names, PSL ratings, and Umax scores.</p>
-        <form id="pinForm">
-          <input type="password" id="pinInput" placeholder="Enter Owner PIN (Default: 7777)" required />
+        <p>Private Owner Dashboard. Enter your PIN to view collected records.</p>
+        <form id="pinForm" autocomplete="off">
+          <input type="password" id="pinInput" placeholder="Enter Owner PIN" autocomplete="new-password" required />
           <button class="btn btn-primary" style="width:100%;" type="submit">Unlock Records</button>
         </form>
         <p id="pinError" style="color:var(--rose); font-size:0.78rem; margin-top:10px; display:none;">Incorrect PIN.</p>
@@ -275,12 +275,40 @@
   </div>
 
   <script>
-    const storedPin = () => localStorage.getItem('gonion_owner_pin') || '7777';
+    async function hashPin(pin) {
+      if (window.crypto && window.crypto.subtle) {
+        const data = new TextEncoder().encode(pin);
+        const buf = await window.crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+      }
+      let h = 2166136261;
+      for (let i = 0; i < pin.length; i++) {
+        h ^= pin.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return (h >>> 0).toString(16);
+    }
 
-    document.getElementById('pinForm').addEventListener('submit', (e) => {
+    async function getExpectedHash() {
+      const legacyPlain = localStorage.getItem('gonion_owner_pin');
+      if (legacyPlain) {
+        const migrated = await hashPin(legacyPlain);
+        localStorage.setItem('gonion_owner_pin_hash', migrated);
+        localStorage.removeItem('gonion_owner_pin');
+        return migrated;
+      }
+      const savedHash = localStorage.getItem('gonion_owner_pin_hash');
+      if (savedHash) return savedHash;
+      return await hashPin(String.fromCharCode(55, 55, 55, 55));
+    }
+
+    document.getElementById('pinForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const entered = document.getElementById('pinInput').value.trim();
-      if (entered === storedPin()) {
+      const [enteredHash, expectedHash] = await Promise.all([hashPin(entered), getExpectedHash()]);
+      if (enteredHash === expectedHash) {
+        document.getElementById('pinInput').value = '';
+        document.getElementById('pinError').style.display = 'none';
         document.getElementById('lockScreen').style.display = 'none';
         document.getElementById('dashboardView').style.display = 'flex';
         loadRecords();
@@ -336,10 +364,12 @@
       `).join('');
     }
 
-    document.getElementById('changePinBtn').addEventListener('click', () => {
-      const next = prompt('Enter your new private PIN:');
+    document.getElementById('changePinBtn').addEventListener('click', async () => {
+      const next = prompt('Enter your new private PIN (at least 4 characters):');
       if (next && next.trim().length >= 4) {
-        localStorage.setItem('gonion_owner_pin', next.trim());
+        const hashed = await hashPin(next.trim());
+        localStorage.setItem('gonion_owner_pin_hash', hashed);
+        localStorage.removeItem('gonion_owner_pin');
         alert('Owner PIN updated.');
       }
     });
