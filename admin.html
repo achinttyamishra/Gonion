@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>GONION // Owner Records Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-base: #0E1117;
+      --bg-surface: #161B25;
+      --bg-input: #11151D;
+      --border-soft: rgba(255, 255, 255, 0.08);
+      --border-warm: rgba(226, 194, 117, 0.36);
+      --gold: #E2C275;
+      --sky: #60A5FA;
+      --mint: #34D399;
+      --rose: #FB7185;
+      --text-main: #F4F6FA;
+      --text-soft: #A3B1C6;
+      --text-muted: #6E7D94;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg-base);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100dvh;
+      padding: 20px 16px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .lock-screen {
+      min-height: 82dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lock-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-warm);
+      border-radius: 22px;
+      padding: 28px 24px;
+      text-align: center;
+    }
+
+    .lock-card h1 {
+      font-family: 'Cinzel', serif;
+      color: var(--gold);
+      font-size: 1.35rem;
+      letter-spacing: 0.16em;
+      margin-bottom: 6px;
+    }
+
+    .lock-card p {
+      font-size: 0.84rem;
+      color: var(--text-soft);
+      margin-bottom: 18px;
+    }
+
+    input[type="password"], input[type="text"] {
+      width: 100%;
+      min-height: 46px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-soft);
+      color: var(--text-main);
+      padding: 10px 14px;
+      border-radius: 13px;
+      font-size: 16px;
+      outline: none;
+      margin-bottom: 12px;
+    }
+
+    input:focus {
+      border-color: var(--gold);
+    }
+
+    .btn {
+      min-height: 44px;
+      padding: 9px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border-soft);
+      background: #1E2432;
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #E8CA7E 0%, #C8A14B 100%);
+      color: #11141B;
+      border: none;
+      font-weight: 700;
+    }
+
+    .btn-danger {
+      color: var(--rose);
+      border-color: rgba(251, 113, 133, 0.3);
+    }
+
+    .dashboard {
+      display: none;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-warm);
+      border-radius: 20px;
+      padding: 18px 22px;
+    }
+
+    .header-bar h1 {
+      font-family: 'Cinzel', serif;
+      color: var(--gold);
+      font-size: 1.25rem;
+      letter-spacing: 0.14em;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-soft);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .stat-card span {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+    }
+
+    .stat-card strong {
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.4rem;
+      color: var(--gold);
+      margin-top: 4px;
+    }
+
+    .panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-soft);
+      border-radius: 20px;
+      padding: 18px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+      font-size: 0.84rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    th {
+      color: var(--text-soft);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.74rem;
+      font-weight: 600;
+      background: rgba(226, 194, 117, 0.14);
+      color: var(--gold);
+    }
+
+    .pill-blue {
+      background: rgba(96, 165, 250, 0.14);
+      color: var(--sky);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Owner PIN Lock Screen -->
+    <div class="lock-screen" id="lockScreen">
+      <div class="lock-card">
+        <h1>GONION VAULT</h1>
+        <p>Private Owner Dashboard. Enter your PIN to view collected user names, PSL ratings, and Umax scores.</p>
+        <form id="pinForm">
+          <input type="password" id="pinInput" placeholder="Enter Owner PIN (Default: 7777)" required />
+          <button class="btn btn-primary" style="width:100%;" type="submit">Unlock Records</button>
+        </form>
+        <p id="pinError" style="color:var(--rose); font-size:0.78rem; margin-top:10px; display:none;">Incorrect PIN.</p>
+      </div>
+    </div>
+
+    <!-- Private Owner Dashboard -->
+    <div class="dashboard" id="dashboardView">
+      <div class="header-bar">
+        <div>
+          <h1>GONION // PRIVATE RECORDS</h1>
+          <p style="font-size:0.78rem; color:var(--text-soft);">Visible only on this page. Hidden from public visitors.</p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn" id="exportCsvBtn" type="button">Download CSV</button>
+          <button class="btn" id="exportJsonBtn" type="button">Download JSON</button>
+          <button class="btn" id="changePinBtn" type="button">Change PIN</button>
+          <button class="btn btn-danger" id="clearAllBtn" type="button">Clear All</button>
+          <a href="/" class="btn" style="text-decoration:none; display:inline-flex; align-items:center;">← Back to Scanner</a>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <span>Total Users Scanned</span>
+          <strong id="totalCount">0</strong>
+        </div>
+        <div class="stat-card">
+          <span>Average PSL Score</span>
+          <strong id="avgPsl">0.00</strong>
+        </div>
+        <div class="stat-card">
+          <span>Average Umax Score</span>
+          <strong id="avgUmax">0.0 / 10</strong>
+        </div>
+      </div>
+
+      <div class="panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Date &amp; Time</th>
+              <th>Current PSL</th>
+              <th>Potential PSL</th>
+              <th>Umax (Now → Pot.)</th>
+              <th>Angles (F / 3-4 / S)</th>
+            </tr>
+          </thead>
+          <tbody id="recordsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const storedPin = () => localStorage.getItem('gonion_owner_pin') || '7777';
+
+    document.getElementById('pinForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const entered = document.getElementById('pinInput').value.trim();
+      if (entered === storedPin()) {
+        document.getElementById('lockScreen').style.display = 'none';
+        document.getElementById('dashboardView').style.display = 'flex';
+        loadRecords();
+      } else {
+        document.getElementById('pinError').style.display = 'block';
+      }
+    });
+
+    function getRecords() {
+      try {
+        return JSON.parse(localStorage.getItem('gonion_private_records') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+
+    function loadRecords() {
+      const records = getRecords();
+      document.getElementById('totalCount').textContent = records.length;
+
+      if (records.length > 0) {
+        const avgP = records.reduce((acc, r) => acc + Number(r.currentPsl || 0), 0) / records.length;
+        const avgU = records.reduce((acc, r) => acc + Number(r.umaxOverall || 0), 0) / records.length;
+        document.getElementById('avgPsl').textContent = avgP.toFixed(2);
+        document.getElementById('avgUmax').textContent = `${avgU.toFixed(1)} / 10`;
+      } else {
+        document.getElementById('avgPsl').textContent = '0.00';
+        document.getElementById('avgUmax').textContent = '0.0 / 10';
+      }
+
+      const tbody = document.getElementById('recordsBody');
+      if (!records.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="color:var(--text-muted); text-align:center; padding:24px;">No scans recorded yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = records.map((r) => `
+        <tr>
+          <td><strong>${escapeHtml(r.name)}</strong></td>
+          <td>${escapeHtml(r.age)}</td>
+          <td style="color:var(--text-soft);">${escapeHtml(r.timestamp)}</td>
+          <td><span class="pill">${Number(r.currentPsl).toFixed(2)} (${escapeHtml(r.tier)})</span></td>
+          <td><span class="pill pill-blue">${Number(r.potentialPsl).toFixed(2)} PSL</span></td>
+          <td><strong>${Number(r.umaxOverall).toFixed(1)}</strong> → ${Number(r.umaxPotential).toFixed(1)} / 10</td>
+          <td style="font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:var(--text-soft);">
+            ${Number(r.frontPsl).toFixed(2)} / ${Number(r.obliquePsl).toFixed(2)} / ${Number(r.profilePsl).toFixed(2)}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('changePinBtn').addEventListener('click', () => {
+      const next = prompt('Enter your new private PIN:');
+      if (next && next.trim().length >= 4) {
+        localStorage.setItem('gonion_owner_pin', next.trim());
+        alert('Owner PIN updated.');
+      }
+    });
+
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+      if (confirm('Delete all saved user records?')) {
+        localStorage.removeItem('gonion_private_records');
+        loadRecords();
+      }
+    });
+
+    function downloadFile(content, filename, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('exportCsvBtn').addEventListener('click', () => {
+      const records = getRecords();
+      if (!records.length) return alert('No records to export.');
+      const headers = ['Date', 'Name', 'Age', 'Current_PSL', 'Tier', 'Potential_PSL', 'Umax_Overall', 'Umax_Potential', 'Front_PSL', 'Oblique_PSL', 'Profile_PSL'];
+      const rows = records.map((r) => [
+        `"${r.timestamp}"`, `"${String(r.name).replace(/"/g, '""')}"`, `"${r.age}"`,
+        r.currentPsl, `"${r.tier}"`, r.potentialPsl, r.umaxOverall, r.umaxPotential,
+        r.frontPsl, r.obliquePsl, r.profilePsl
+      ].join(','));
+      downloadFile([headers.join(','), ...rows].join('\n'), 'gonion-private-records.csv', 'text/csv');
+    });
+
+    document.getElementById('exportJsonBtn').addEventListener('click', () => {
+      const records = getRecords();
+      if (!records.length) return alert('No records to export.');
+      downloadFile(JSON.stringify(records, null, 2), 'gonion-private-records.json', 'application/json');
+    });
+  </script>
+</body>
+</html>
